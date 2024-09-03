@@ -1,8 +1,9 @@
 import json
 import pathlib
+from typing import Any
 
 import requests
-from bs4 import BeautifulSoup, ResultSet
+from bs4 import BeautifulSoup, ResultSet, NavigableString, Tag
 
 from pathlib import *
 
@@ -20,12 +21,12 @@ def format_str(entry_str: str) -> str:
 
 
 # cобираем карточку товара
-def create_product_card(path: Path, sub_category_name: str):
+def create_product_card(path: Path, sub_category_name: str) -> None:
     p_file = pathlib.Path(path)
     src = p_file.read_text(encoding="utf-8")
     data = json.loads(src)
 
-    product_card_with_name_dict: dict = {}
+    product_card_with_name_dict: dict[str, dict[str, str]] = {}
 
     for item in data:
         item_text = format_str(item)
@@ -37,16 +38,18 @@ def create_product_card(path: Path, sub_category_name: str):
 
         code_html: str = p_file.read_text(encoding="utf-8")
         soup: BeautifulSoup = BeautifulSoup(code_html, "lxml")
+
         price = soup.find("div", class_="price-current").text
         price = price[1:]
+
         article = soup.find("div", class_="shop2-product-article").text
         price = price.replace(" Р ", "")
         article = article.replace("Артикул: ", "")
         # print(article)
         # print(price)
 
-        exit_list_categories: list = ["iMac", "Стекла_для_Apple_Watch"]
-        exit_list_articles: list = [
+        exit_list_categories: list[str] = ["iMac", "Стекла_для_Apple_Watch"]
+        exit_list_articles: list[str] = [
             "ILC-IP13PM-CARD",
             "GRAVRU",
             "GRAVRU",
@@ -63,7 +66,7 @@ def create_product_card(path: Path, sub_category_name: str):
             "table", class_="product-item-options reset-table"
         ).find_all("tr")
 
-        product_card_dict: dict = {}
+        product_card_dict: dict[str, str] = {}
 
         for item in table_head:
             row_name = item.find("th").text
@@ -78,7 +81,7 @@ def create_product_card(path: Path, sub_category_name: str):
         product_card_dict["article"] = article
         product_card_with_name_dict[item_text] = product_card_dict
 
-        print(product_card_with_name_dict)
+        # print(product_card_with_name_dict)
 
         p_json_file = pathlib.Path((f"{path.parent}/{sub_category_name}_cards.json"))
         p_json_file.write_text(
@@ -90,7 +93,7 @@ def create_product_card(path: Path, sub_category_name: str):
 ## собираем все товары в категории
 def create_data_sub_sub_category(
     parent_category_name: str, sub_category_name: str, sub_category_url: str
-):
+) -> None:
     # req: Response = requests.get(sub_category_url)
     # src = req.text
 
@@ -108,10 +111,10 @@ def create_data_sub_sub_category(
     code_html: str = p_file.read_text(encoding="utf-8")
     soup: BeautifulSoup = BeautifulSoup(code_html, "lxml")
 
-    all_products_in_category: ResultSet = soup.find_all(
+    all_products_in_category = soup.find_all(
         "div", class_="uk-grid-item shop2-product-item"
     )
-    all_products_in_category_dict: dict = {}
+    all_products_in_category_dict: dict[str, str] = {}
 
     for item in all_products_in_category:
         item_text = item.find("div", class_="product-item-name").text
@@ -134,7 +137,7 @@ def create_data_sub_sub_category(
 
 
 ## для тех категорий у которых нет саб категорий
-def create_data_wo_sub_categories(category_name: str):
+def create_data_wo_sub_categories(category_name: str) -> None:
     code_html: str = pathlib.Path(
         f"data/sotohit_data/{category_name}/{category_name}.html"
     ).read_text(encoding="utf-8")
@@ -143,7 +146,7 @@ def create_data_wo_sub_categories(category_name: str):
 
     all_products = soup.find_all("div", class_="uk-grid-item shop2-product-item")
 
-    all_products_dict: dict = {}
+    all_products_dict: dict[str, str] = {}
 
     for item in all_products:
         item_text = item.find(class_="product-item-name").text
@@ -159,8 +162,14 @@ def create_data_wo_sub_categories(category_name: str):
 
 
 ## собираем все подкатегории кглавных категории товаров
-def create_data_sub_categories(url: str, all_categories_with_link: dict):
-    exit_list: list = ["Игровые_приставки", "Цифровые_плееры", "Портативная_акустика"]
+def create_data_sub_categories(
+    url: str, all_categories_with_link: dict[str, str]
+) -> None:
+    exit_list: list[str] = [
+        "Игровые_приставки",
+        "Цифровые_плееры",
+        "Портативная_акустика",
+    ]
 
     for category_name, category_link in all_categories_with_link.items():
         rep = [" / ", " ", ",", "-"]
@@ -181,7 +190,7 @@ def create_data_sub_categories(url: str, all_categories_with_link: dict):
 
             all_sub_categories = soup.find_all("div", class_="main-categories-item")
 
-            all_sub_categories_dict: dict = {}
+            all_sub_categories_dict: dict[str, str] = {}
 
             for item in all_sub_categories:
 
@@ -224,17 +233,15 @@ def create_data_sub_categories(url: str, all_categories_with_link: dict):
 
 
 ## собираем все главные категории товаров
-def create_data_category(url: str):
+def create_data_category(url: str) -> None:
     p: Path = pathlib.Path("data/sotohit_data/index.html")
     code_html: str = p.read_text(encoding="utf-8")
 
     soup: BeautifulSoup = BeautifulSoup(code_html, "lxml")
 
-    all_categories: ResultSet = soup.find_all(
-        "li", class_="has-child dontsplit", id="q111"
-    )
+    all_categories = soup.find_all("li", class_="has-child dontsplit", id="q111")
 
-    all_categories_with_link: dict = {}
+    all_categories_with_link: dict[str, str] = {}
 
     for item in all_categories:
         category_name: str = item.find("a").text
@@ -242,7 +249,7 @@ def create_data_category(url: str):
         all_categories_with_link[category_name] = url + category_link
         # print(category_name, category_link)
 
-    json_file: Path = pathlib.Path(f"data/sotohit_data/sotohit_categories.json")
+    # json_file: Path = pathlib.Path(f"data/sotohit_data/sotohit_categories.json")
     # json_file.write_text(
     #     json.dumps(all_categories_with_link, ensure_ascii=False, indent=4),
     #     encoding="utf-8",
@@ -258,15 +265,15 @@ def get_url() -> str:
     return url
 
 
-def get_headers():
-    headers: dict = {
+def get_headers() -> dict[str, str]:
+    headers: dict[str, str] = {
         "Accept": "*/*",
         "User-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
     }
     return headers
 
 
-def create_main_data():
+def create_main_data() -> None:
     # req: Response = requests.get(url=get_url(), headers=get_headers())
     #
     # src: str = req.text
