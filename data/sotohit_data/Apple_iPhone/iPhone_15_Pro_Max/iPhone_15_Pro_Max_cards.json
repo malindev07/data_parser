@@ -1,0 +1,87 @@
+{
+    "Apple_iPhone_15_Pro_Max_256GB_Natural_Titanium_(Натуральный_титан)_nano-Sim___eSim": {
+        "Производитель:": "Apple",
+        "Гарантия": "12 месяцев",
+        "Объем памяти": "256GB",
+        "P/N": "MU6R3 ",
+        "Параметры SIM": "nano-Sim + eSim",
+        "Комплектация": "кабель",
+        "price": "111850",
+        "article": "A15PM-256-NTM"
+    },
+    "Apple_iPhone_15_Pro_Max_256GB_Blue_Titanium_(Синий_титан)_nano-Sim___eSim": {
+        "Производитель:": "Apple",
+        "Гарантия": "12 месяцев",
+        "Цвет товара": "Синий",
+        "Объем памяти": "256GB",
+        "P/N": "MU6T3 ",
+        "Параметры SIM": "nano-Sim + eSim",
+        "Комплектация": "кабель",
+        "price": "111850",
+        "article": "A15PM-256-BTM"
+    },
+    "Apple_iPhone_15_Pro_Max_256GB_White_Titanium_(Белый_титан)_nano-Sim___eSim": {
+        "Производитель:": "Apple",
+        "Гарантия": "12 месяцев",
+        "Цвет товара": "Белый",
+        "Объем памяти": "256GB",
+        "P/N": "MU6Q3 ",
+        "Параметры SIM": "nano-Sim + eSim",
+        "Комплектация": "кабель",
+        "price": "111950",
+        "article": "A15PM-256-WHTM"
+    },
+    "Apple_iPhone_15_Pro_Max_256GB_Black_Titanium_(Черный_титан)_nano-Sim___eSim": {
+        "Производитель:": "Apple",
+        "Гарантия": "12 месяцев",
+        "Цвет товара": "Черный",
+        "Объем памяти": "256GB",
+        "P/N": "MU773 ",
+        "Параметры SIM": "nano-Sim + eSim",
+        "Комплектация": "кабель",
+        "price": "111850",
+        "article": "A15PM-256-BLKTM"
+    },
+    "Apple_iPhone_15_Pro_Max_512GB_Natural_Titanium_(Натуральный_титан)_nano-Sim___eSim": {
+        "Производитель:": "Apple",
+        "Гарантия": "12 месяцев",
+        "Объем памяти": "512GB",
+        "P/N": "MU6W3 ",
+        "Параметры SIM": "nano-Sim + eSim",
+        "Комплектация": "кабель",
+        "price": "128900",
+        "article": "A15PM-512-NTM"
+    },
+    "Apple_iPhone_15_Pro_Max_1TB_Natural_Titanium_(Натуральный_титан)_nano-Sim___eSim": {
+        "Производитель:": "Apple",
+        "Гарантия": "12 месяцев",
+        "Объем памяти": "1024GB",
+        "P/N": "MU7J3 ",
+        "Параметры SIM": "nano-Sim + eSim",
+        "Комплектация": "кабель",
+        "price": "148900",
+        "article": "A15PM-1024-NTM"
+    },
+    "Apple_iPhone_15_Pro_Max_1TB_Blue_Titanium_(Синий_титан)_nano-Sim___eSim": {
+        "Производитель:": "Apple",
+        "Гарантия": "12 месяцев",
+        "Цвет товара": "Синий",
+        "Объем памяти": "1024GB",
+        "P/N": "MU7K3 ",
+        "Параметры SIM": "nano-Sim + eSim",
+        "Комплектация": "кабель",
+        "price": "148980",
+        "article": "A15PM-1024-BTM"
+    },
+    "Apple_iPhone_15_Pro_Max_1TB_Black_Titanium_(Черный_титан)_nano-Sim___eSim": {
+        "Производитель:": "Apple",
+        "Гарантия": "12 месяцев",
+        "Цвет товара": "Черный",
+        "Объем памяти": "1024GB",
+        "P/N": "MU6Y3 ",
+        "Параметры SIM": "nano-Sim + eSim",
+        "Комплектация": "кабель",
+        "price": "148450",
+        "article": "A15PM-1024-BLKTM"
+    }
+}

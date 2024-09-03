@@ -1,0 +1,32 @@
+{
+    "Apple_iPad_Pro_13_(2024)_256GB_Wi-Fi___Cellular_Space_Black_MVXR3": {
+        "Производитель:": "Apple",
+        "Гарантия": "12 месяцев",
+        "Цвет товара": "Черный",
+        "Объем памяти": "256GB",
+        "P/N": "MVXR3 ",
+        "Беспроводная связь": "Wi-Fi + Cellular",
+        "price": "116450",
+        "article": "MVXR3"
+    },
+    "Apple_iPad_Pro_13_(2024)_1TB_Wi-Fi___Cellular_Space_Black_MVXW3": {
+        "Производитель:": "Apple",
+        "Гарантия": "12 месяцев",
+        "Цвет товара": "Черный",
+        "Объем памяти": "1024GB",
+        "P/N": "MVXW3 ",
+        "Беспроводная связь": "Wi-Fi + Cellular",
+        "price": "179750",
+        "article": "MVXW3"
+    },
+    "Apple_iPad_Pro_13_(2024)_2TB_Wi-Fi___Cellular_Space_Black_MVXY3": {
+        "Производитель:": "Apple",
+        "Гарантия": "12 месяцев",
+        "Цвет товара": "Черный",
+        "Объем памяти": "2048GB",
+        "P/N": "MVXY3 ",
+        "Беспроводная связь": "Wi-Fi + Cellular",
+        "price": "193350",
+        "article": "MVXY3"
+    }
+}
