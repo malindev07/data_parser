@@ -24,14 +24,26 @@ class WorkerSotohit:
         src = req.text
 
         for i in range(1, self.data_count + 1):
-            p_file_html = pathlib.Path().absolute().joinpath(f"worker_sotohit_{i}.html")
+            p_file_html = (
+                pathlib.Path()
+                .cwd()
+                .joinpath("workers")
+                .joinpath("worker_sotohit")
+                .joinpath(f"worker_sotohit_{i}.html")
+            )
             p_file_html.write_text(src, encoding="utf-8")
 
     def create_json_data(self) -> None:
         product_cards_dict: list[dict[str, str]] = []
 
         for i in range(1, self.data_count + 1):
-            p_file_html = pathlib.Path().absolute().joinpath(f"worker_sotohit_{i}.html")
+            p_file_html = (
+                pathlib.Path()
+                .cwd()
+                .joinpath("workers")
+                .joinpath("worker_sotohit")
+                .joinpath(f"worker_sotohit_{i}.html")
+            )
             code_html = p_file_html.read_text(encoding="utf-8")
 
             soup = BeautifulSoup(code_html, "lxml")
@@ -57,6 +69,8 @@ class WorkerSotohit:
                 price = search_price.text
                 price = price[1:]
                 price = price.replace(" Р ", "")
+            else:
+                break
 
             search_article = soup.find("div", class_="shop2-product-article")
 
@@ -64,6 +78,8 @@ class WorkerSotohit:
             if search_article is not None:
                 article = search_article.text
                 article = article.replace("Артикул: ", "")
+            else:
+                break
 
             search_find_table_head = soup.find(
                 "table", class_="product-item-options reset-table"
@@ -95,16 +111,26 @@ class WorkerSotohit:
 
             product_cards_dict.append(product_card_dict)
 
-        p_file_json_data = pathlib.Path().absolute().joinpath(f"worker_sotohit.json")
+        p_file_json_data = (
+            pathlib.Path()
+            .cwd()
+            .joinpath("workers")
+            .joinpath("worker_sotohit")
+            .joinpath(f"worker_sotohit.json")
+        )
         p_file_json_data.write_text(
             json.dumps(product_cards_dict, indent=4, ensure_ascii=False),
             encoding="utf-8",
         )
-        print(json.dumps(product_cards_dict, ensure_ascii=False, indent=4))
+        # print(json.dumps(product_cards_dict, ensure_ascii=False, indent=4))
 
     def get_random_card(self) -> dict[str, str]:
         p_file_json_data: pathlib.Path = (
-            pathlib.Path().absolute().joinpath(f"worker_sotohit.json")
+            pathlib.Path()
+            .cwd()
+            .joinpath("workers")
+            .joinpath("worker_sotohit")
+            .joinpath(f"worker_sotohit.json")
         )
         data: str = p_file_json_data.read_text(encoding="utf-8")
 
@@ -116,10 +142,10 @@ class WorkerSotohit:
         return json_data[random_num]
 
 
-a = WorkerSotohit(
-    url="https://sotohit.ru/internet-magazin2/product/apple-iphone-15-pro-128gb-white-titanium-belyj-titan-nano-sim-esim",
-    data_count=5,
-)
+# a = WorkerSotohit(
+#     url="https://sotohit.ru/internet-magazin2/product/apple-iphone-15-pro-128gb-white-titanium-belyj-titan-nano-sim-esim",
+#     data_count=3,
+# )
 
 # a.create_pages_htmls()
 # a.create_json_data()
