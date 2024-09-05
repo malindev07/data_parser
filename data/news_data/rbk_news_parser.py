@@ -25,7 +25,7 @@ def pars_all_news() -> None:
     src = req.text
 
     # print(src)
-    p_file = pathlib.Path("rbk_news_page.html")
+    p_file = pathlib.Path("data/news_data/rbk_news_page.html")
 
     p_file.write_text(src, encoding="utf-8")
 
@@ -61,11 +61,11 @@ def parse_news_json() -> list[dict[str, str]]:
     #     all_news_dict.append(res_dict)
     #
     # all_news_dict.reverse()
-    p_json_data = pathlib.Path("rbk_news.json")
+    p_json_data = pathlib.Path("data/news_data/rbk_news.json")
     src = p_json_data.read_text(encoding="utf-8")
     json_data: list[dict[str, str]] = json.loads(src)
 
-    if os.stat("rbk_news.json").st_size == 0:
+    if os.stat("data/news_data/rbk_news.json").st_size == 0:
         p_json_file = pathlib.Path("rbk_news.json")
         p_json_file.write_text(
             json.dumps(json_data, indent=4, ensure_ascii=False),
@@ -75,13 +75,16 @@ def parse_news_json() -> list[dict[str, str]]:
         logger.info("File is not empty")
         checked_news = check_new_news()
 
+        count_upd = 0
         for new_news in checked_news:
             if new_news in json_data:
-                logger.info("Такая новость уже была")
+                logger.debug("Такая новость уже была")
             else:
-                print(new_news)
+                count_upd += 1
+                logger.info(new_news)
 
-        p_json_file = pathlib.Path("rbk_news.json")
+        logger.info(f"Количество новых новостей {count_upd}")
+        p_json_file = pathlib.Path("data/news_data/rbk_news.json")
         p_json_file.write_text(
             json.dumps(checked_news, indent=4, ensure_ascii=False),
             encoding="utf-8",
@@ -93,7 +96,7 @@ def parse_news_json() -> list[dict[str, str]]:
 
 def check_new_news() -> list[dict[str, str]]:
     pars_all_news()
-    p_file = pathlib.Path("rbk_news_page.html")
+    p_file = pathlib.Path("data/news_data/rbk_news_page.html")
     src = p_file.read_text(encoding="utf-8")
 
     soup = BeautifulSoup(src, "lxml")
@@ -128,4 +131,4 @@ def check_new_news() -> list[dict[str, str]]:
 
 
 # pars_all_news()
-parse_news_json()
+# parse_news_json()

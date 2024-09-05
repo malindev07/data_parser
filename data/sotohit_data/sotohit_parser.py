@@ -1,11 +1,16 @@
 import json
+import os
 import pathlib
+from typing import Any
+
 import requests
 from bs4 import BeautifulSoup
 
 from pathlib import *
 
 from requests import Response
+
+from logger import logger
 
 
 def format_str(entry_str: str) -> str:
@@ -18,6 +23,23 @@ def format_str(entry_str: str) -> str:
     return entry_str
 
 
+def check_changes_in_category(path: Path, sub_category_name: str) -> Any:
+    # p_file = (
+    #     pathlib.Path(path)
+    #     .cwd()
+    #     .joinpath(category_name)
+    #     .joinpath(sub_category_name)
+    #     .joinpath(f"{sub_category_name}_cards.json")
+    # )
+    p_file = pathlib.Path(path).joinpath(f"{sub_category_name}_cards.json")
+    src = p_file.read_text(encoding="utf-8")
+
+    data = json.loads(src)
+
+    # print(json.dumps(data, indent=4, ensure_ascii=False))
+    return data
+
+
 # cобираем карточку товара
 def create_product_card(path: Path, sub_category_name: str) -> None:
     p_file = pathlib.Path(path)
@@ -25,7 +47,19 @@ def create_product_card(path: Path, sub_category_name: str) -> None:
     data = json.loads(src)
 
     product_card_with_name_dict: dict[str, dict[str, str]] = {}
-
+    ## создать класс на исключения и сделать сет
+    exit_list_categories: list[str] = ["iMac", "Стекла_для_Apple_Watch"]
+    exit_list_articles: list[str] = [
+        "ILC-IP13PM-CARD",
+        "GRAVRU",
+        "GRAVRU",
+        "ILC-IP14PM-CARD",
+        "iL-MAGN-13P-CLN",
+        "ILC-IP13-CARD",
+        "ILC-IP11-CARD",
+        "EU-ADAPTER",
+    ]
+    ## создать класс на исключения
     for item in data:
         item_text = format_str(item)
 
@@ -37,26 +71,19 @@ def create_product_card(path: Path, sub_category_name: str) -> None:
         code_html: str = p_file.read_text(encoding="utf-8")
         soup: BeautifulSoup = BeautifulSoup(code_html, "lxml")
 
+        #### ИСПРАВИТЬ!!!
+        # if price is None:
+        #     logger.error("Data is none")
+        #     continue
+        # else:
         price = soup.find("div", class_="price-current").text
         price = price[1:]
+        #### ИСПРАВИТЬ!!!
 
         article = soup.find("div", class_="shop2-product-article").text
         price = price.replace(" Р ", "")
         article = article.replace("Артикул: ", "")
-        # print(article)
-        # print(price)
 
-        exit_list_categories: list[str] = ["iMac", "Стекла_для_Apple_Watch"]
-        exit_list_articles: list[str] = [
-            "ILC-IP13PM-CARD",
-            "GRAVRU",
-            "GRAVRU",
-            "ILC-IP14PM-CARD",
-            "iL-MAGN-13P-CLN",
-            "ILC-IP13-CARD",
-            "ILC-IP11-CARD",
-            "EU-ADAPTER",
-        ]
         if sub_category_name in exit_list_categories or article in exit_list_articles:
             break
 
@@ -79,13 +106,32 @@ def create_product_card(path: Path, sub_category_name: str) -> None:
         product_card_dict["article"] = article
         product_card_with_name_dict[item_text] = product_card_dict
 
-        # print(product_card_with_name_dict)
-
-        p_json_file = pathlib.Path((f"{path.parent}/{sub_category_name}_cards.json"))
+    if os.stat(f"{path.parent}/{sub_category_name}_cards.json").st_size == 0:
+        p_json_file = pathlib.Path(f"{path.parent}/{sub_category_name}_cards.json")
         p_json_file.write_text(
             json.dumps(product_card_with_name_dict, ensure_ascii=False, indent=4),
             encoding="utf-8",
         )
+    else:
+        old_data = check_changes_in_category(
+            path=path.parent, sub_category_name=sub_category_name
+        )
+        count_upd = 0
+        for item in product_card_with_name_dict:
+            if product_card_with_name_dict[item]["price"] != old_data[item]["price"]:
+                count_upd += 1
+                logger.info(
+                    f"У товара {item} изменилась цена! Старая цена: {old_data[item]['price']}, Новая цена: {product_card_with_name_dict[item]['price']} "
+                )
+        if count_upd == 0:
+            logger.info(f"В категории {sub_category_name} изменений нет ")
+        else:
+            logger.info(f"В категории {sub_category_name} изменений {count_upd} ")
+            p_json_file = pathlib.Path(f"{path.parent}/{sub_category_name}_cards.json")
+            p_json_file.write_text(
+                json.dumps(product_card_with_name_dict, ensure_ascii=False, indent=4),
+                encoding="utf-8",
+            )
 
 
 ## собираем все товары в категории
@@ -125,6 +171,7 @@ def create_data_sub_sub_category(
     p_json_file = pathlib.Path(
         f"data/sotohit_data/{parent_category_name}/{sub_category_name}/{sub_category_name}.json"
     )
+
     # p_json_file.write_text(
     #     json.dumps(all_products_in_category_dict, ensure_ascii=False, indent=4),
     #     encoding="utf-8",
@@ -151,8 +198,8 @@ def create_data_wo_sub_categories(category_name: str) -> None:
         item_link = item.find(class_="product-item-name").find("a").get("href")
         all_products_dict[item_text] = item_link
 
-    json_data = pathlib.Path(f"data/sotohit_data/{category_name}/{category_name}.json")
-    "data/sotohit_data/Игровые_приставки/Игровые_приставки.json"
+    # json_data = pathlib.Path(f"data/sotohit_data/{category_name}/{category_name}.json")
+    # "data/sotohit_data/Игровые_приставки/Игровые_приставки.json"
     # json_data.write_text(
     #     json.dumps(all_products_dict, ensure_ascii=False, indent=4),
     #     encoding="utf-8",
@@ -280,3 +327,12 @@ def create_main_data() -> None:
     # p.write_text(src, encoding="utf-8")
 
     create_data_category(url=get_url())
+
+
+# def choose_parse_category(category_name: str):
+#     return category_name
+
+
+# check_changes_in_category(
+#     category_name="Apple_iPhone", sub_category_name="iPhone_15_Pro"
+# )
