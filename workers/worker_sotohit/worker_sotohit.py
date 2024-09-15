@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from bs4 import BeautifulSoup, NavigableString
 import requests
 
+from logger import logger
+
 
 @dataclass
 class WorkerSotohit:
@@ -107,6 +109,9 @@ class WorkerSotohit:
                 product_card_dict[row_name] = row_contains
 
             product_card_dict["price"] = price
+            if i % 2 == 1:
+                product_card_dict["price"] = str(random.randint(1, 100000))
+
             product_card_dict["article"] = article
 
             product_cards_dict.append(product_card_dict)
@@ -135,8 +140,98 @@ class WorkerSotohit:
         data: str = p_file_json_data.read_text(encoding="utf-8")
 
         json_data: list[dict[str, str]] = json.loads(data)
-
+        self.data_count = len(json_data)
         random_num = random.randint(0, self.data_count - 1)
 
-        print(json_data[random_num])
+        # logger.info(json.dumps(json_data[random_num], ensure_ascii=False, indent=4))
         return json_data[random_num]
+
+    def update_card(self):
+        req = requests.get(url=self.url, headers=self.get_headers())
+        src = req.text
+
+        soup = BeautifulSoup(src, "lxml")
+
+        search_product_title = soup.find(class_="site-content-inner")
+        if search_product_title is not None:
+
+            search_product_title_2 = search_product_title.find("h1")
+
+            if search_product_title_2 is not None and not isinstance(
+                search_product_title_2, int
+            ):
+                product_title = search_product_title_2.text
+            else:
+                return None
+        else:
+            return None
+
+        search_price = soup.find("div", class_="price-current")
+
+        price: str
+        if search_price is not None:
+            price = search_price.text
+            price = price[1:]
+            price = price.replace(" Р ", "")
+        else:
+            return None
+
+        search_article = soup.find("div", class_="shop2-product-article")
+
+        article: str
+        if search_article is not None:
+            article = search_article.text
+            article = article.replace("Артикул: ", "")
+        else:
+            return None
+
+        search_find_table_head = soup.find(
+            "table", class_="product-item-options reset-table"
+        )
+        if search_find_table_head is not None and not isinstance(
+            search_find_table_head, NavigableString
+        ):
+            search_find_all_table_head = search_find_table_head.find_all("tr")
+            if search_find_all_table_head is not None:
+                table_head = search_find_all_table_head
+            else:
+                return None
+        else:
+            return None
+
+        product_card_dict: dict[str, str] = {"Наименование": product_title}
+
+        for item in table_head:
+            row_name = item.find("th").text
+            row_contains = item.find("td").text
+
+            if row_name == "Цвет товара":
+                row_contains = item.find("p", class_="tit_color").text
+
+            product_card_dict[row_name] = row_contains
+
+        product_card_dict["price"] = price
+        product_card_dict["article"] = article
+
+        return product_card_dict
+
+    def check_changes(self):
+        old_data = self.get_random_card()
+        new_data = self.update_card()
+
+        if old_data["price"] != new_data["price"]:
+            return f"Цена изменилась! Старая цена {old_data['price']}, новая цена {new_data['price']} "
+        else:
+            return f"Изменений у товара {old_data['Наименование']} нет"
+
+        # return new_data
+
+
+# a = WorkerSotohit(
+#     url="https://sotohit.ru/internet-magazin2/product/apple-iphone-15-pro-max-256gb-natural-titanium-naturalnyj-titan-nano"
+#     "-sim"
+#     "-esim",
+#     data_count=5,
+# )
+#
+# a.check_changes()

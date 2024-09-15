@@ -2,10 +2,11 @@ import json
 import pathlib
 import random
 from dataclasses import dataclass
-from html.parser import HTMLParser
-from w3lib.html import replace_entities
-from bs4 import BeautifulSoup, NavigableString
+
+from bs4 import BeautifulSoup
 import requests
+
+from logger import logger
 
 
 @dataclass
@@ -80,6 +81,8 @@ class WorkerBaucenter:
                     price = search_price_3.text
                     price = price.strip().replace(" ", "")[:-2]
                     product_card_dict["Стоимость"] = price
+                    if i % 2 == 1:
+                        product_card_dict["Стоимость"] = str(random.randint(1, 100000))
                     # print(price)
                 else:
                     break
@@ -123,6 +126,7 @@ class WorkerBaucenter:
         )
 
     def get_random_card(self) -> dict[str, str]:
+
         p_file_json_data: pathlib.Path = (
             pathlib.Path()
             .cwd()
@@ -133,8 +137,83 @@ class WorkerBaucenter:
         data: str = p_file_json_data.read_text(encoding="utf-8")
 
         json_data: list[dict[str, str]] = json.loads(data)
-
+        self.data_count = len(json_data)
         random_num = random.randint(0, self.data_count - 1)
 
-        print(json.dumps(json_data[random_num], ensure_ascii=False, indent=4))
+        # logger.info(json.dumps(json_data[random_num], ensure_ascii=False, indent=4))
         return json_data[random_num]
+
+    def update_card(self):
+        req = requests.get(url=self.url, headers=self.get_headers())
+        src = req.text
+
+        soup = BeautifulSoup(src, "lxml")
+
+        product_card_dict: dict[str, str] = {}
+
+        search_product_title = soup.find("section", class_="product")
+        if search_product_title is not None:
+
+            search_product_title_2 = search_product_title.find("h1")
+
+            if search_product_title_2 is not None and not isinstance(
+                search_product_title_2, int
+            ):
+                product_title = search_product_title_2.text
+                product_card_dict["Название"] = product_title
+            else:
+                return None
+        else:
+            return None
+
+        price: str
+
+        search_price = soup.find("span", class_="price-block_price_text")
+
+        if search_price is not None and not isinstance(search_price, int):
+            search_price.extract()
+            search_price_3 = soup.find("div", class_="price-block__price-text-wrap")
+            if search_price_3 is not None:
+
+                price = search_price_3.text
+                price = price.strip().replace(" ", "")[:-2]
+                product_card_dict["Стоимость"] = price
+                # print(price)
+            else:
+                return None
+        else:
+            return None
+
+        search_short_list = soup.find("div", class_="product-collapse_drop")
+
+        if search_short_list is not None:
+            short_list = search_short_list.text.strip()
+            product_card_dict["Описание"] = short_list
+            # print(short_list)
+        else:
+            return None
+
+        search_tables_row = soup.find_all(class_="description-more_table-row")
+
+        if search_tables_row is not None:
+
+            for item in search_tables_row:
+                row = item.text.strip().split(":")
+                row_list: list[str] = []
+
+                for i in row:
+                    if not isinstance(i, int):
+                        row_list.append(i.strip())
+
+                product_card_dict[row_list[0]] = row_list[1]
+
+                return product_card_dict
+
+    def check_changes(self):
+        old_data = self.get_random_card()
+        new_data = self.update_card()
+
+        if old_data["Стоимость"] != new_data["Стоимость"]:
+            return f"Цена изменилась! Старая цена {old_data['Стоимость']}, новая цена {new_data['Стоимость']} "
+        else:
+            return f"Изменений у товара {old_data['Название']} нет"

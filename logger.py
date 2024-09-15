@@ -1,5 +1,5 @@
 import logging
-from logging import getLogger, basicConfig, DEBUG, FileHandler, ERROR, StreamHandler
+from logging import getLogger, basicConfig, DEBUG, FileHandler, StreamHandler
 
 logger = getLogger(__name__)
 FORMAT = logging.Formatter(
