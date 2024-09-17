@@ -6,24 +6,26 @@ from dataclasses import dataclass
 from bs4 import BeautifulSoup
 import requests
 
-from logger import logger
+from db.mongo_db_parser import save_data_to_db
 
 
 @dataclass
 class WorkerBaucenter:
+
     url: str
     data_count: int
+    topic: str = "baucenter"
 
     @staticmethod
-    def get_headers() -> dict[str, str]:
+    async def get_headers() -> dict[str, str]:
         headers = {
             "Accept": "*/*",
             "User-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
         }
         return headers
 
-    def create_pages_htmls(self) -> None:
-        req = requests.get(url=self.url, headers=self.get_headers())
+    async def create_pages_htmls(self) -> None:
+        req = requests.get(url=self.url, headers=await self.get_headers())
         src = req.text
 
         for i in range(1, self.data_count + 1):
@@ -37,7 +39,7 @@ class WorkerBaucenter:
 
             p_file_html.write_text(src, encoding="utf-8")
 
-    def create_json_data(self) -> None:
+    async def create_json_data(self) -> None:
         product_cards_dict: list[dict[str, str]] = []
 
         for i in range(1, self.data_count + 1):
@@ -125,7 +127,7 @@ class WorkerBaucenter:
             encoding="utf-8",
         )
 
-    def get_random_card(self) -> dict[str, str]:
+    async def get_random_card(self) -> dict[str, str]:
 
         p_file_json_data: pathlib.Path = (
             pathlib.Path()
@@ -143,8 +145,8 @@ class WorkerBaucenter:
         # logger.info(json.dumps(json_data[random_num], ensure_ascii=False, indent=4))
         return json_data[random_num]
 
-    def update_card(self):
-        req = requests.get(url=self.url, headers=self.get_headers())
+    async def update_card(self):
+        req = requests.get(url=self.url, headers=await self.get_headers())
         src = req.text
 
         soup = BeautifulSoup(src, "lxml")
@@ -209,11 +211,24 @@ class WorkerBaucenter:
 
                 return product_card_dict
 
-    def check_changes(self):
-        old_data = self.get_random_card()
-        new_data = self.update_card()
+    async def check_changes(self):
+        old_data = await self.get_random_card()
+        new_data = await self.update_card()
+        res: str = ""
 
         if old_data["Стоимость"] != new_data["Стоимость"]:
-            return f"Цена изменилась! Старая цена {old_data['Стоимость']}, новая цена {new_data['Стоимость']} "
+            res = f"Цена изменилась! Старая цена {old_data['Стоимость']}, новая цена {new_data['Стоимость']}"
+            await save_data_to_db(
+                old_price=old_data["Стоимость"],
+                new_price=new_data["Стоимость"],
+                title=old_data["Название"],
+                topic=self.topic,
+            )
+            return res
         else:
-            return f"Изменений у товара {old_data['Название']} нет"
+            res = f"Изменений у товара {old_data['Название']} нет"
+            return res
+
+    async def return_title(self):
+        title = await self.get_random_card()
+        return title["Название"]

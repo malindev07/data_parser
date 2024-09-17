@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from bs4 import BeautifulSoup, NavigableString
 import requests
 
+from db.mongo_db_parser import save_data_to_db
 from logger import logger
 
 
@@ -12,17 +13,18 @@ from logger import logger
 class WorkerSotohit:
     url: str
     data_count: int
+    topic: str = "sotohit"
 
     @staticmethod
-    def get_headers() -> dict[str, str]:
+    async def get_headers() -> dict[str, str]:
         headers = {
             "Accept": "*/*",
             "User-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
         }
         return headers
 
-    def create_pages_htmls(self) -> None:
-        req = requests.get(url=self.url, headers=self.get_headers())
+    async def create_pages_htmls(self) -> None:
+        req = requests.get(url=self.url, headers=await self.get_headers())
         src = req.text
 
         for i in range(1, self.data_count + 1):
@@ -35,7 +37,7 @@ class WorkerSotohit:
             )
             p_file_html.write_text(src, encoding="utf-8")
 
-    def create_json_data(self) -> None:
+    async def create_json_data(self) -> None:
         product_cards_dict: list[dict[str, str]] = []
 
         for i in range(1, self.data_count + 1):
@@ -129,7 +131,7 @@ class WorkerSotohit:
         )
         # print(json.dumps(product_cards_dict, ensure_ascii=False, indent=4))
 
-    def get_random_card(self) -> dict[str, str]:
+    async def get_random_card(self) -> dict[str, str]:
         p_file_json_data: pathlib.Path = (
             pathlib.Path()
             .cwd()
@@ -146,8 +148,8 @@ class WorkerSotohit:
         # logger.info(json.dumps(json_data[random_num], ensure_ascii=False, indent=4))
         return json_data[random_num]
 
-    def update_card(self):
-        req = requests.get(url=self.url, headers=self.get_headers())
+    async def update_card(self):
+        req = requests.get(url=self.url, headers=await self.get_headers())
         src = req.text
 
         soup = BeautifulSoup(src, "lxml")
@@ -215,14 +217,22 @@ class WorkerSotohit:
 
         return product_card_dict
 
-    def check_changes(self):
-        old_data = self.get_random_card()
-        new_data = self.update_card()
+    async def check_changes(self):
+        old_data = await self.get_random_card()
+        new_data = await self.update_card()
 
         if old_data["price"] != new_data["price"]:
-            return f"Цена изменилась! Старая цена {old_data['price']}, новая цена {new_data['price']} "
+            res = f"Цена изменилась! Старая цена {old_data['price']}, новая цена {new_data['price']} "
+            await save_data_to_db(
+                old_price=old_data["price"],
+                new_price=new_data["price"],
+                title=old_data["Наименование"],
+                topic=self.topic,
+            )
+            return res
         else:
-            return f"Изменений у товара {old_data['Наименование']} нет"
+            res = f"Изменений у товара {old_data['Наименование']} нет"
+            return res
 
         # return new_data
 

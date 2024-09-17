@@ -10,4 +10,5 @@ baucenter_router = APIRouter(prefix="/baucenter", tags=["Baucenter"])
 async def get_baucenter_card(url: str):
     topic = "baucenter"
     await send_one(url=url, topic=topic)
-    return await consume()
+    res = await consume()
+    return res

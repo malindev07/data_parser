@@ -1,7 +1,7 @@
 import json
 
 from aiokafka import AIOKafkaConsumer
-import asyncio
+
 
 from api.action import create_parser
 
@@ -15,7 +15,8 @@ async def consume():
         "sotohit",
         "baucenter",
         bootstrap_servers="localhost:9092",
-        group_id="my-group",
+        # bootstrap_servers="kafka:29092",
+        # group_id="my-group",
         value_deserializer=deserializer,
     )
     # Get cluster layout and join group `my-group`
@@ -32,7 +33,8 @@ async def consume():
                 msg.value,
             )
 
-            res = await create_parser(url=msg.value, topic=msg.topic, data_count=5)
+            res: str = await create_parser(url=msg.value, topic=msg.topic, data_count=5)
+            print(res)
             return res
 
     finally:

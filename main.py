@@ -6,6 +6,7 @@ import uvicorn
 
 from api.baucenter_handler import baucenter_router
 from api.sotohit_handler import sotohit_router
+from db.mongo_db_parser import DataBaseConnection
 from logger import logger
 
 # from workers.kafka_action.consumer import consume
@@ -17,7 +18,9 @@ from fastapi import FastAPI
 
 # @contextlib.asynccontextmanager
 # async def lifespan(app: FastAPI):
-#     yield {"123": "123"}
+#     con = DataBaseConnection(host="localhost", port=27017, db_name="parser_db")
+#
+#     yield {"con": con}
 
 
 app = FastAPI()

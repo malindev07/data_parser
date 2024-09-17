@@ -12,9 +12,9 @@ async def create_parser(url: str, topic: str, data_count: int):
     elif topic == "baucenter":
         parser = WorkerBaucenter(url=url, data_count=data_count)
 
-    parser.create_pages_htmls()
-    parser.create_json_data()
-    res = parser.check_changes()
+    await parser.create_pages_htmls()
+    await parser.create_json_data()
+    res = await parser.check_changes()
 
     return res
 
