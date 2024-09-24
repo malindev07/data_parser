@@ -1,6 +1,3 @@
-
-
-
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:6.2.0
@@ -37,24 +34,12 @@ services:
 #      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
 #      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
 
-  kafdrop:
-    image: obsidiandynamics/kafdrop:3.27.0
-    networks:
-      - broker-kafka
-    depends_on:
-      - kafka
-      - zookeeper
-    ports:
-      - 19000:9000
-    environment:
-      KAFKA_BROKERCONNECT: kafka:29092
-
   app:
     container_name: app_test
     build:
       dockerfile: Dockerfile
     environment:
-#      - KAFKA_TOPIC_NAME=topic_test
+#      - KAFKA_TOPIC_NAME=baucenter
       - KAFKA_SERVER=kafka
       - KAFKA_PORT=29092
     ports:
@@ -65,15 +50,14 @@ services:
       - kafka
     networks:
       - broker-kafka
-#  mongo:
-#    ports:
-#      - '27017:27017'
-#    container_name: dkrcomp-mongo
-#    restart: always
-#    logging:
-#      options:
-#        max-size: 1g
-#    image: mongo
+  mongodb:
+    image: mongo:6-jammy
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017/
+    ports:
+      - '27017:27017'
+    networks:
+      - broker-kafka
 
 
 

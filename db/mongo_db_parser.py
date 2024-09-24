@@ -15,8 +15,10 @@ class DataBaseConnection:
         self.db_name = db_name
         self.db = self.return_db()
 
-    def return_client(self):
-        return MongoClient(host=self.host, port=self.port)
+    @staticmethod
+    def return_client():
+        # return MongoClient("mongodb://localhost:27017/")
+        return MongoClient("mongodb://mongodb:27017/")
 
     def return_db(self):
         con = self.return_client()
@@ -24,12 +26,12 @@ class DataBaseConnection:
         return db
 
 
-con = DataBaseConnection(host="localhost", port=27017, db_name="parser_db")
-# con = DataBaseConnection(host="mongodb", port=27017, db_name="parser_db")
+# con = DataBaseConnection(host="localhost", port=27017, db_name="parser_db")
+con = DataBaseConnection(host="mongo", port=27017, db_name="parser_db")
 Database = con.return_db()
 
 
-async def save_data_to_db(old_price: str, new_price: str, topic: str, title: str):
+def save_data_to_db(old_price: str, new_price: str, topic: str, title: str):
     res = {
         "title": title,
         "old_price": old_price,

@@ -1,4 +1,7 @@
+import asyncio
 import json
+import threading
+import time
 
 from aiokafka import AIOKafkaConsumer
 
@@ -14,11 +17,12 @@ async def consume():
     consumer = AIOKafkaConsumer(
         "sotohit",
         "baucenter",
-        bootstrap_servers="localhost:9092",
-        # bootstrap_servers="kafka:29092",
+        # bootstrap_servers="localhost:9092",
+        bootstrap_servers="kafka:29092",
         # group_id="my-group",
         value_deserializer=deserializer,
     )
+
     # Get cluster layout and join group `my-group`
     await consumer.start()
 
@@ -35,11 +39,84 @@ async def consume():
 
             res: str = await create_parser(url=msg.value, topic=msg.topic, data_count=5)
             print(res)
+
             return res
 
     finally:
         # Will leave consumer group; perform autocommit if enabled.
         await consumer.stop()
+
+
+async def start_consume():
+    while True:
+        await consume()
+
+
+time.sleep(5)
+
+
+# async def consume_bau():
+#     consumer = AIOKafkaConsumer(
+#         "baucenter",
+#         bootstrap_servers="localhost:9092",
+#         # bootstrap_servers="kafka:29092",
+#         # group_id="my-group",
+#         value_deserializer=deserializer,
+#     )
+#     # Get cluster layout and join group `my-group`
+#     await consumer.start()
+#
+#     try:
+#         # Consume messages
+#
+#         async for msg in consumer:
+#
+#             print(
+#                 "consumed: ",
+#                 msg.topic,
+#                 msg.value,
+#             )
+#
+#             res: str = await create_parser(url=msg.value, topic=msg.topic, data_count=3)
+#             print(res)
+#
+#             return res
+#
+#     finally:
+#         # Will leave consumer group; perform autocommit if enabled.
+#         await consumer.stop()
+#
+#
+# async def consume_sot():
+#     consumer = AIOKafkaConsumer(
+#         "sotohit",
+#         bootstrap_servers="localhost:9092",
+#         # bootstrap_servers="kafka:29092",
+#         # group_id="my-group",
+#         value_deserializer=deserializer,
+#     )
+#     # Get cluster layout and join group `my-group`
+#     await consumer.start()
+#
+#     try:
+#         # Consume messages
+#
+#         async for msg in consumer:
+#
+#             print(
+#                 "consumed: ",
+#                 msg.topic,
+#                 msg.value,
+#             )
+#
+#             res: str = await create_parser(url=msg.value, topic=msg.topic, data_count=3)
+#             print(res)
+#
+#             return res
+#
+#     finally:
+#         # Will leave consumer group; perform autocommit if enabled.
+#         await consumer.stop()
 
 
 # from confluent_kafka import KafkaException
