@@ -9,18 +9,18 @@ class DataBaseConnection:
     port: int
     db_name: str
 
-    def __init__(self, host, port, db_name):
+    def __init__(self, host: str, port: int, db_name: str) -> None:
         self.host = host
         self.port = port
         self.db_name = db_name
         self.db = self.return_db()
 
     @staticmethod
-    def return_client():
-        # return MongoClient("mongodb://localhost:27017/")
-        return MongoClient("mongodb://mongodb:27017/")
+    def return_client():  # название лучше get
+        return MongoClient("mongodb://localhost:27017/")
+        # return MongoClient("mongodb://mongodb:27017/")
 
-    def return_db(self):
+    def return_db(self):  # название лучше get
         con = self.return_client()
         db = con[self.db_name]
         return db

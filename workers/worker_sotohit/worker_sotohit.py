@@ -217,7 +217,7 @@ class WorkerSotohit:
 
         return product_card_dict
 
-    def check_changes(self):
+    def check_changes(self) -> str:
         old_data = self.get_random_card()
         new_data = self.update_card()
 

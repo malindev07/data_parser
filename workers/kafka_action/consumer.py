@@ -17,8 +17,8 @@ async def consume():
     consumer = AIOKafkaConsumer(
         "sotohit",
         "baucenter",
-        # bootstrap_servers="localhost:9092",
-        bootstrap_servers="kafka:29092",
+        bootstrap_servers="localhost:9092",
+        # bootstrap_servers="kafka:29092",
         # group_id="my-group",
         value_deserializer=deserializer,
     )
